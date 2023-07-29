@@ -1,0 +1,36 @@
+---
+- name: Install Jenkins
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Add Jenkins Repository
+      yum_repository:
+        name: jenkins
+        description: Jenkins Repository
+        baseurl: http://pkg.jenkins.io/redhat
+        gpgcheck: yes
+        gpgkey: https://pkg.jenkins.io/redhat/jenkins.io.key
+        state: present
+    - name: Download Jenkins GPG Key
+      get_url:
+        url: https://pkg.jenkins.io/redhat/jenkins.io-2023.key
+        dest: /opt/jenkins.io-2023.key
+        mode: '0644'
+    - name: Import Jenkins GPG Key (RHEL/CentOS)
+      shell: rpm --import /opt/jenkins.io-2023.key
+          
+    - name: Install Java (OpenJDK)
+      yum:
+        name: java
+        state: present
+
+    - name: Install Jenkins
+      yum:
+        name: jenkins
+        state: present
+
+    - name: Start Jenkins service
+      service:
+        name: jenkins
+        state: started
